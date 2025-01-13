@@ -886,7 +886,7 @@ with col1:
                 
                 ## INCREMENTO o CREO il CONTATORE VISITE
                 CACHE_DIR = "cache"
-                path_contatore = os.path.join(CACHE_DIR,'contatore.plk')
+                path_contatore = os.path.join(CACHE_DIR,'contatore.pkl')
                 if os.path.exists(path_contatore):
                         with open(path_contatore,'rb') as f:
                             parziale = pickle.load(f)
@@ -906,11 +906,12 @@ with col1:
                 
                 dati_yfinance= pd.DataFrame() # contatore è una chiamata particolare, per superare i successivi controlli ho bisogno del df dati_yfinance vuoto 
                 CACHE_DIR = "cache"
-                path_contatore = os.path.join(CACHE_DIR,'contatore.plk')
+                path_contatore = os.path.join(CACHE_DIR,'contatore.pkl')
                 if os.path.exists(path_contatore):
                         with open(path_contatore,'rb') as f:
                             valore_contatore = pickle.load(f)
                             st.write(valore_contatore)
+                        st.write(os.listdir('cache'))    
                 else:
                     os.makedirs(CACHE_DIR,exist_ok = True)
                     with open(path_contatore,'wb') as f:
@@ -1211,7 +1212,7 @@ st.markdown("""
         }
     </style>
     <div class="footer">
-        <a href="https://grastofilo.github.io/GAPs_Finder_dipendent_files/disclaimer.html" target="_blank">Data Disclaimer</a>
+        <a href="github.com/GapFound/GAP_Finder_dipendent_files/disclaimer.html" target="_blank">Data Disclaimer</a>
     </div>
 """, unsafe_allow_html=True)
 
