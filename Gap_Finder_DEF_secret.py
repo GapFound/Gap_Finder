@@ -297,9 +297,12 @@ def fondamentali_func(nome_ticker):
     tentativi = 1
     while tentativi < 5:
 
+
+        finvitz_stampa = st.empty()
+        
         try:
             
-            finvitz_stampa = st.empty()
+            #finvitz_stampa = st.empty()
             
             
             with finvitz_stampa.container():
