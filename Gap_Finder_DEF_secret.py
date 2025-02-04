@@ -297,12 +297,9 @@ def fondamentali_func(nome_ticker):
     tentativi = 1
     while tentativi < 5:
 
-
-        finvitz_stampa = st.empty()
-        
         try:
             
-            #finvitz_stampa = st.empty()
+            finvitz_stampa = st.empty()
             
             
             with finvitz_stampa.container():
@@ -320,9 +317,11 @@ def fondamentali_func(nome_ticker):
                         risposta = finvitz_data.get(voce)  
                     except:
                         risposta = ' - '
-                    return risposta    
+                    return risposta   
+                
                         
-                        
+                nationality_exchange = {'nation':prendi_voce("Country"),
+                                        'exchange':prendi_voce("Exchange")}            
                     
                 sector_industry = {'sector':prendi_voce("Sector"),
                                 'industry':prendi_voce("Industry")}
@@ -357,6 +356,8 @@ def fondamentali_func(nome_ticker):
                         inst_own:' - ',
                         short_float:' - ' }
         
+        
+        nationality_exchange = {'nation':" - ",'exchange':" - "}
         sector_industry = {'sector':' - ','industry':' - '}
         news = 'problemi nel caricamento delle news da Finviz'
         #return fondamentali 
@@ -376,7 +377,7 @@ def fondamentali_func(nome_ticker):
     
         
 
-    return fond_df,sector_industry
+    return fond_df,nationality_exchange,sector_industry
 
 
 #%%
@@ -927,12 +928,13 @@ with col1:
              
                 dati_storici_ADJ,dati_storici_DEF = elaborazione(dati_yfinance)
                 #dati_split = stock_split(dati_yfinance)
-                fondamentali,sector_industry = fondamentali_func(nome_ticker)
+                fondamentali,nationality_exchange,sector_industry = fondamentali_func(nome_ticker)
                 news = news_func(nome_ticker)
                 
                 
                 st.session_state['dati_storici'] = dati_storici_DEF #dati_yfinance
                 st.session_state['fondamentali'] = fondamentali
+                st.session_state['nationality_exchange'] = nationality_exchange
                 st.session_state['sector_industry'] = sector_industry
                 st.session_state['news'] = news
                 st.session_state['dati_split'] = dati_split
@@ -960,9 +962,10 @@ with col1:
             st.write("")
             
             st.markdown(f"""
-                    <div style="font-size: 22px; font-weight: bold;">{nome_ticker.upper()}</div>
-                    <div style="font-size: 14px;">{st.session_state['sector_industry']['sector']}</div>
-                    <div style="font-size: 14px;">{st.session_state['sector_industry']['industry']}</div>
+                    <div style="font-size: 22px; font-weight: bold;margin-bottom: 2px;">{nome_ticker.upper()}</div>
+                    <div style="font-size: 12px;"><b>{st.session_state['nationality_exchange']['nation']} - {st.session_state['nationality_exchange']['exchange']}</b></div>
+                    <div style="font-size: 13px;">{st.session_state['sector_industry']['sector']}</div>
+                    <div style="font-size: 13px;">{st.session_state['sector_industry']['industry']}</div>
                     <br> <!-- Rigo vuoto aggiunto qui -->
                     """, unsafe_allow_html=True)
 
@@ -1130,15 +1133,28 @@ with col2:
                                   # Mostra l'output con la data formattata
                                    
                                 with col2_5: 
+                                    # st.markdown(f"""
+                                    #             <div style="text-align:left; font-size: 13px;">
+                                    #             <strong style="color: red;">{data_da_stampa}</strong>&nbsp;
+                                    #             <a href="{b['Link']}" style="text-decoration: none; color: black;">
+                                    #             {b['Title']}
+                                    #             </a>
+                                    #             </div>
+                                            
+                                    #             """, unsafe_allow_html=True)
+                                    
                                     st.markdown(f"""
                                                 <div style="text-align:left; font-size: 13px;">
-                                                <strong style="color: red;">{data_da_stampa}</strong>&nbsp;
-                                                <a href="{b['Link']}" style="text-decoration: none; color: black;">
-                                                {b['Title']}
-                                                </a>
+                                                    <strong style="color: red;">{data_da_stampa}</strong>&nbsp;
+                                                    <a href="{b['Link']}" style="text-decoration: none; color: inherit;">
+                                                        {b['Title']}
+                                                    </a>
                                                 </div>
+                                            """, unsafe_allow_html=True)
                                             
-                                                """, unsafe_allow_html=True)
+                                            
+                                            
+                                            
                                                 
                    if isinstance(st.session_state['news'],str): #and len(st.session_state['news'])>0:
                            st.markdown(f"""
@@ -1215,7 +1231,7 @@ st.markdown("""
         }
     </style>
     <div class="footer">
-        <a href="https://gapfound.github.io/GAP_Finder_dipendent_files/disclaimer.html" target="_blank">Data Disclaimer</a>          
+        <a href="github.com/GapFound/GAP_Finder_dipendent_files/disclaimer.html" target="_blank">Data Disclaimer</a>
     </div>
 """, unsafe_allow_html=True)
 
