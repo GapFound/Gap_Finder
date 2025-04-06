@@ -438,115 +438,125 @@ def yfinance_func(nome_ticker):
     
     
     # inserisci un TRY QUI. TRY a prendere i dati storici EXCEPT: STORICO sul PREZZO non disponibile.
+    # dopo qualche mese e qualche errore...Inserito!
     
-    # CARICO DA YFINANCE I DATI STORICI DI PREZZO
-    ticker = yf.Ticker(nome_ticker.upper())   
-    dati_storici = ticker.history(period="max")  # dati periodo massimo disponibile   
-    #dati_storici.index = dati_storici.index.tz_localize(None)
+    try:
+    
+        # CARICO DA YFINANCE I DATI STORICI DI PREZZO
+        ticker = yf.Ticker(nome_ticker.upper())   
+        dati_storici = ticker.history(period="max")  # dati periodo massimo disponibile   
+        #dati_storici.index = dati_storici.index.tz_localize(None)
+        
+        
+        
+        if len(dati_storici.columns)==7:  
+            
+            dati_storici.index = dati_storici.index.tz_localize(None)
+            
     
     
-    
-    if len(dati_storici.columns)==7:  
+            CACHE_DIR = "cache"
+            os.makedirs(CACHE_DIR, exist_ok=True)
+            #print(os.listdir('cache'))
         
-        dati_storici.index = dati_storici.index.tz_localize(None)
+            
+            cache_file = os.path.join(CACHE_DIR, f"{nome_ticker.upper()}.pkl") #nomina il file + la posizione che avrà quando sarà salvato nella cache
+            #print(cache_file)
+            
+            
+            
+            if os.path.exists(cache_file):
+                with open(cache_file, "rb") as f:
+                    #print(f"Caricamento dati splits {nome_ticker} dalla cache.")
+                    splits_df = pickle.load(f)
+            else:
+                
+                #print('provo a prendere i dati dal provider')
+                FMP_api_key = st.secrets["FMP_api_key"]
+                splits_df = stock_split(nome_ticker,cache_file,FMP_api_key)
+               
+            
+                
+                
+                
+                
+                
         
-
-
-        CACHE_DIR = "cache"
-        os.makedirs(CACHE_DIR, exist_ok=True)
-        #print(os.listdir('cache'))
-    
+            if not splits_df.empty:
+                
+                dati_storici.index = pd.to_datetime(dati_storici.index).normalize()
+                splits_df.index = pd.to_datetime(splits_df.index).normalize()
+                
+               
         
-        cache_file = os.path.join(CACHE_DIR, f"{nome_ticker.upper()}.pkl") #nomina il file + la posizione che avrà quando sarà salvato nella cache
-        #print(cache_file)
+                dati_storici = dati_storici.merge(splits_df['split_factor'],left_index=True,right_index=True,how='left')
+                dati_storici['split_factor'] = dati_storici['split_factor'].fillna(0)
+                
+               
+        
+                dati_storici.drop('Stock Splits',axis=1,inplace=True)
+                dati_storici.rename(columns={'split_factor':'Stock Splits'},inplace=True)
+                
+                dati_storici['Stock Splits'] = pd.to_numeric(dati_storici['Stock Splits'],errors='coerce')
+                
+                
+            # else: 
+            #     print('il ticker non ha splits/reverse splits, oppure...')
+            #     print('non ho trovato i dati splits dal provider e quindi uso quelli base di YFINANCE')
+                
+            
+            
+            
+            
+            
+            # APPORTO dei CORRETTIVI al DF dati_storici ORIGINALE e creo un DF splits_format per VISUALIZZARE gli SPLITS
+            dati_storici = dati_storici.reset_index()
+            dati_storici['Data'] = dati_storici['Date'].dt.date
+            dati_storici.drop('Date',inplace=True,axis=1)
+            dati_storici.rename(columns={'Data':'Date'},inplace=True)
+            colonna_da_spostare = dati_storici.pop('Date')
+            dati_storici.insert(0,'Date',colonna_da_spostare)
+            
+            splits_format = formatta_splits(dati_storici)
+            
+            # if not splits_df.empty:
+            #     splits_df = splits_df.sort_index()
+            #     splits_df.index = pd.to_datetime(splits_df.index).date
+            #     splits_df['split_factor'] = splits_df['split_factor'].apply(lambda x: f'1/{int(1/x)}' \
+            #                                             if x<1 else f'{x:.1f}/1'.replace('.',','))
+            
+            
+                
+                
+            
+            return dati_storici,splits_format
+       
         
         
         
-        if os.path.exists(cache_file):
-            with open(cache_file, "rb") as f:
-                #print(f"Caricamento dati splits {nome_ticker} dalla cache.")
-                splits_df = pickle.load(f)
+               
+        
+            
         else:
             
-            #print('provo a prendere i dati dal provider')
-            FMP_api_key = st.secrets["FMP_api_key"]
-            splits_df = stock_split(nome_ticker,cache_file,FMP_api_key)
-           
-        
+            splits_df = pd.DataFrame()
             
-            
-            
-            
-            
-    
-        if not splits_df.empty:
-            
-            dati_storici.index = pd.to_datetime(dati_storici.index).normalize()
-            splits_df.index = pd.to_datetime(splits_df.index).normalize()
-            
-           
-    
-            dati_storici = dati_storici.merge(splits_df['split_factor'],left_index=True,right_index=True,how='left')
-            dati_storici['split_factor'] = dati_storici['split_factor'].fillna(0)
-            
-           
-    
-            dati_storici.drop('Stock Splits',axis=1,inplace=True)
-            dati_storici.rename(columns={'split_factor':'Stock Splits'},inplace=True)
-            
-            dati_storici['Stock Splits'] = pd.to_numeric(dati_storici['Stock Splits'],errors='coerce')
-            
-            
-        # else: 
-        #     print('il ticker non ha splits/reverse splits, oppure...')
-        #     print('non ho trovato i dati splits dal provider e quindi uso quelli base di YFINANCE')
-            
+            if dati_storici.empty:
+                st.write('Nonexistent or delisted title')
+                return dati_storici,splits_df
         
+            if len(dati_storici.columns)==8:
+                st.write(f"{nome_ticker.upper()} it's not a stock")
+                dati_storici = pd.DataFrame()
+                return dati_storici,splits_df
+
+
+
+
+
+    except:
         
-        
-        
-        
-        # APPORTO dei CORRETTIVI al DF dati_storici ORIGINALE e creo un DF splits_format per VISUALIZZARE gli SPLITS
-        dati_storici = dati_storici.reset_index()
-        dati_storici['Data'] = dati_storici['Date'].dt.date
-        dati_storici.drop('Date',inplace=True,axis=1)
-        dati_storici.rename(columns={'Data':'Date'},inplace=True)
-        colonna_da_spostare = dati_storici.pop('Date')
-        dati_storici.insert(0,'Date',colonna_da_spostare)
-        
-        splits_format = formatta_splits(dati_storici)
-        
-        # if not splits_df.empty:
-        #     splits_df = splits_df.sort_index()
-        #     splits_df.index = pd.to_datetime(splits_df.index).date
-        #     splits_df['split_factor'] = splits_df['split_factor'].apply(lambda x: f'1/{int(1/x)}' \
-        #                                             if x<1 else f'{x:.1f}/1'.replace('.',','))
-        
-        
-            
-            
-        
-        return dati_storici,splits_format
-   
-    
-    
-    
-           
-    
-        
-    else:
-        
-        splits_df = pd.DataFrame()
-        
-        if dati_storici.empty:
-            st.write('Nonexistent or delisted title')
-            return dati_storici,splits_df
-    
-        if len(dati_storici.columns)==8:
-            st.write(f"{nome_ticker.upper()} it's not a stock")
-            dati_storici = pd.DataFrame()
-            return dati_storici,splits_df
-        
+        st.write('Yfinance server busy at the moment - try again')    
         
 
 #%%
@@ -1341,7 +1351,6 @@ st.markdown("""
         <a href="https://GapFound.github.io/GAP_Finder_dipendent_files/disclaimer.html" target="_blank">Data Disclaimer</a>
     </div>
 """, unsafe_allow_html=True)
-
 
 
 #%%
