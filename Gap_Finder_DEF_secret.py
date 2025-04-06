@@ -235,6 +235,7 @@ def fondamentali_func(nome_ticker):
     
     
     market_cap = 'M.Cap'
+    outstanding = 'Outstand.'
     shares_float = 'Float'
     insider_own =  'Insider'
     inst_own = 'Inst.O.'
@@ -270,10 +271,14 @@ def fondamentali_func(nome_ticker):
             except:
                 perc_corretta = ' - '
                 
-            return perc_corretta    
+            return perc_corretta 
+        
+        
                 
-
-        fondamentali_yf = {market_cap: prendi_trasforma_valore('marketCap'),           
+        website = fond['website']
+        
+        fondamentali_yf = {market_cap: prendi_trasforma_valore('marketCap'), 
+                            outstanding : prendi_trasforma_valore('sharesOutstanding'),
                             shares_float: prendi_trasforma_valore('floatShares'),
                             insider_own: aggiusto_perc('heldPercentInsiders'),
                             inst_own: aggiusto_perc('heldPercentInstitutions'),
@@ -282,7 +287,8 @@ def fondamentali_func(nome_ticker):
         
     except:  
         
-        fondamentali_yf = {market_cap:' - ',           
+        fondamentali_yf = {market_cap:' - ',
+                        outstanding: ' - ',   
                         shares_float:' - ',
                         insider_own:' - ',
                         inst_own:' - ',
@@ -326,8 +332,9 @@ def fondamentali_func(nome_ticker):
                 sector_industry = {'sector':prendi_voce("Sector"),
                                 'industry':prendi_voce("Industry")}
                 
-                fondamentali_fz = {market_cap: prendi_voce('Market Cap'),           
-                                shares_float: prendi_voce('Shs Float'),
+                fondamentali_fz = {market_cap: prendi_voce('Market Cap'),
+                                 outstanding:prendi_voce('Shs Outstand'),
+                                shares_float:prendi_voce('Shs Float'),
                                 insider_own:prendi_voce('Insider Own'),
                                 inst_own: prendi_voce('Inst Own'),
                                 short_float:prendi_voce('Short Float')}
@@ -350,7 +357,8 @@ def fondamentali_func(nome_ticker):
         
     if tentativi == 5: 
         #print("caricamento dati fondamentali da FINVITZ fallito")
-        fondamentali_fz = {market_cap:' - ',           
+        fondamentali_fz = {market_cap:' - ',
+                        outstanding: ' - ',   
                         shares_float:' - ',
                         insider_own:' - ',
                         inst_own:' - ',
@@ -361,9 +369,12 @@ def fondamentali_func(nome_ticker):
         sector_industry = {'sector':' - ','industry':' - '}
         news = 'problemi nel caricamento delle news da Finviz'
         #return fondamentali 
-        #print(fondamentali_fz)
         
-        
+    
+    
+    # print(fondamentali_yf)   
+    # print(fondamentali_fz)
+     
         
     fond_fz_df = pd.DataFrame({'a':fondamentali_fz.keys(),'Fz':fondamentali_fz.values()})
     #print(fond_fz_df)
@@ -377,7 +388,7 @@ def fondamentali_func(nome_ticker):
     
         
 
-    return fond_df,nationality_exchange,sector_industry
+    return fond_df,nationality_exchange,sector_industry,website
 
 
 #%%
@@ -563,7 +574,25 @@ def ricerca_gaps(nome_ticker,dati_storici,gap_perc_A,gap_perc_B,volume,prezzo_A,
     
     gaps = dati_storici.iloc[:,[0,1,2,3,4,5,9,10,11,-1,6]].copy()
     
-        
+    
+    #------------------------------------
+    # verifico che non siano day 2 o più
+
+    gaps['day1_extention'] = ((gaps['Close'].shift(1)*100)/gaps['Open'].shift(1))-100 
+    
+    # le righe qui sotto commentate servono a fare un eventuale controllo anche sul volume
+    # controllo per adesso scartato
+    #gaps['day1_volume'] = gaps['Volume'].shift(1)
+    #gaps = gaps[(gaps['day1_volume']<=10_000_000)&(gaps['day1_extention']<30)] 
+    
+    gaps = gaps[(gaps['day1_extention']<30)]
+    gaps.pop('day1_extention')
+    
+    # in queste rige sopra abbiamo eliminato dal gruppo dei gaps tutti i gaps che hanno una giornata precedente 
+    # di  con estensionedi prezzo >= 30% e che quindi rendono il gaps da considerare già in Day 2 e non più day 1
+    #-----------------------------------
+
+    
         
     gaps = gaps[(gaps['Gap %']>=gap_perc_A)&\
                         (gaps['Gap %']<=gap_perc_B)&\
@@ -826,7 +855,7 @@ with col1:
           
         
     with st.form(key=f'GAPs_Finder'):
-            nome_ticker = st.text_input('**GAPs Finder v1.03pr**',placeholder='Enter the Ticker').strip()
+            nome_ticker = st.text_input('**GAPs Finder v1.04pr**',placeholder='Enter the Ticker').strip()
             bottone_ricerca = st.form_submit_button('ricerca GAPs')
          
     
@@ -891,6 +920,9 @@ with col1:
                 ## INCREMENTO o CREO il CONTATORE VISITE
                 CACHE_DIR = "cache"
                 path_contatore = os.path.join(CACHE_DIR,'contatore.pkl')
+                path_contatore_daily = os.path.join(CACHE_DIR,'contatore_daily.pkl')
+                path_data_start_contatore = os.path.join(CACHE_DIR,'data_start_contatore.pkl')
+                
                 if os.path.exists(path_contatore):
                         with open(path_contatore,'rb') as f:
                             parziale = pickle.load(f)
@@ -899,41 +931,108 @@ with col1:
                     
                         with open(path_contatore,'wb') as f:
                             pickle.dump(parziale,f)
-                        
+                            
                 else:
                     os.makedirs(CACHE_DIR,exist_ok=True)
                     with open(path_contatore,'wb') as f:
                         pickle.dump(1,f)
-                #--------------------------------------------   
+                        
+                    with open(path_data_start_contatore,'wb') as f:
+                        data_start = datetime.strftime(datetime.now().date(),"%Y-%m-%d")
+                        pickle.dump(data_start,f)
+                        
+                #----        
+                            
+                if os.path.exists(path_contatore_daily):
+                    
+                        with open(path_contatore_daily,'rb') as f:
+                            parziale = pickle.load(f)
+                        
+                        parziale +=1 
+                    
+                        with open(path_contatore_daily,'wb') as f:
+                            pickle.dump(parziale,f)    
+                            
+                        
+                else:
+                    os.makedirs(CACHE_DIR,exist_ok=True)
+                        
+                    with open(path_contatore_daily,'wb') as f:
+                        pickle.dump(1,f) 
+                        
+                        
+                #-------------------------------------------- 
+                
+            
                 
             else:
                 
                 dati_yfinance= pd.DataFrame() # contatore è una chiamata particolare, per superare i successivi controlli ho bisogno del df dati_yfinance vuoto 
                 CACHE_DIR = "cache"
                 path_contatore = os.path.join(CACHE_DIR,'contatore.pkl')
+                path_contatore_daily = os.path.join(CACHE_DIR,'contatore_daily.pkl')
+                path_data_start_contatore = os.path.join(CACHE_DIR,'data_start_contatore.pkl')
+                
                 if os.path.exists(path_contatore):
                         with open(path_contatore,'rb') as f:
                             valore_contatore = pickle.load(f)
                             st.write(valore_contatore)
-                        st.write(os.listdir('cache'))    
+                            
+                            
                 else:
                     os.makedirs(CACHE_DIR,exist_ok = True)
                     with open(path_contatore,'wb') as f:
                         pickle.dump(0,f)
                         
+                        
                 
+                if os.path.exists(path_data_start_contatore):            
+                        with open(path_data_start_contatore,'rb') as f:
+                            data_start = pickle.load(f) 
+                             
+                        st.write(data_start)
+                                
+                else:
+                     os.makedirs(CACHE_DIR,exist_ok = True)
+                     with open(path_data_start_contatore,'wb') as f:
+                         data_start = datetime.strftime(datetime.now().date(),"%Y-%m-%d")
+                         pickle.dump(data_start,f)
+                         
+                         
+                        
+                            
+                if os.path.exists(path_contatore_daily):            
+                        with open(path_contatore_daily,'rb') as f:
+                            valore_contatore_daily = pickle.load(f) 
+                             
+                        st.write(valore_contatore_daily)
+                        st.write(os.listdir('cache'))  
+                        
+                        
+                                  
+                else:
+                    os.makedirs(CACHE_DIR,exist_ok = True)
+                    with open(path_contatore_daily,'wb') as f:
+                        pickle.dump(0,f)    
+                        
+            
+            
+            
+            
+            
             
             
             if not dati_yfinance.empty:
              
                 dati_storici_ADJ,dati_storici_DEF = elaborazione(dati_yfinance)
                 #dati_split = stock_split(dati_yfinance)
-                fondamentali,nationality_exchange,sector_industry = fondamentali_func(nome_ticker)
+                fondamentali,nationality_exchange,sector_industry,website = fondamentali_func(nome_ticker)
                 news = news_func(nome_ticker)
                 
                 
                 st.session_state['dati_storici'] = dati_storici_DEF #dati_yfinance
                 st.session_state['fondamentali'] = fondamentali
+                st.session_state['website'] = website
                 st.session_state['nationality_exchange'] = nationality_exchange
                 st.session_state['sector_industry'] = sector_industry
                 st.session_state['news'] = news
@@ -962,11 +1061,19 @@ with col1:
             st.write("")
             
             st.markdown(f"""
-                    <div style="font-size: 22px; font-weight: bold;margin-bottom: 2px;">{nome_ticker.upper()}</div>
+                    <div style="font-size: 22px; font-weight: bold; margin-bottom: 2px;">
+                        <a href="{st.session_state['website']}" target="_blank" style="text-decoration: none; color: inherit;">
+                            {nome_ticker.upper()}
+                        </a>
+                    </div>
                     <div style="font-size: 12px;"><b>{st.session_state['nationality_exchange']['nation']} - {st.session_state['nationality_exchange']['exchange']}</b></div>
-                    <div style="font-size: 13px;">{st.session_state['sector_industry']['sector']}</div>
-                    <div style="font-size: 13px;">{st.session_state['sector_industry']['industry']}</div>
-                    <br> <!-- Rigo vuoto aggiunto qui -->
+                    <div style="font-size: 13px; font-weight: normal; color: #444;">
+                        {st.session_state['sector_industry']['sector']}
+                    </div>
+                    <div style="font-size: 13px; font-weight: normal; color: #444;">
+                        {st.session_state['sector_industry']['industry']}
+                    </div>
+                    <br>
                     """, unsafe_allow_html=True)
 
                     # <div style="font-size: 14px;">  
@@ -1231,7 +1338,7 @@ st.markdown("""
         }
     </style>
     <div class="footer">
-        <a href="https://gapfound.github.io/GAP_Finder_dipendent_files/disclaimer.html" target="_blank">Data Disclaimer</a>
+        <a href="github.com/GapFound/GAP_Finder_dipendent_files/disclaimer.html" target="_blank">Data Disclaimer</a>
     </div>
 """, unsafe_allow_html=True)
 
