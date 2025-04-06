@@ -1338,7 +1338,7 @@ st.markdown("""
         }
     </style>
     <div class="footer">
-        <a href="GapFound.github.io/GAP_Finder_dipendent_files/disclaimer.html" target="_blank">Data Disclaimer</a>
+        <a href="https://GapFound.github.io/GAP_Finder_dipendent_files/disclaimer.html" target="_blank">Data Disclaimer</a>
     </div>
 """, unsafe_allow_html=True)
 
