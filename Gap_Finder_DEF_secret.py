@@ -901,7 +901,7 @@ with col1:
                 #print('cancello i files nerlla cache')#cancella la cache
                 
                 for file in os.listdir('cache'):
-                    if file != 'contatore.pkl':
+                    if file != 'contatore.pkl' and file != 'data_start_contatore.pkl':
                         os.remove(os.path.join('cache', file))
                     
                 with open(data_cache_name,"wb") as f:
