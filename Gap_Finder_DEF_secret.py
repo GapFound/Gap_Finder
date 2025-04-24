@@ -275,7 +275,12 @@ def fondamentali_func(nome_ticker):
         
         
                 
-        website = fond['website']
+        try:        
+            website = fond['website']
+        except:
+            website = ""
+
+        
         
         fondamentali_yf = {market_cap: prendi_trasforma_valore('marketCap'), 
                             outstanding : prendi_trasforma_valore('sharesOutstanding'),
@@ -1070,11 +1075,22 @@ with col1:
             st.write("")
             st.write("")
             
+            if st.session_state['website']:
+                
+                ticker_html = f"""
+                    <a href="{st.session_state['website']}" target="_blank" style="text-decoration: none; color: inherit;">
+                        {nome_ticker.upper()}
+                    </a>
+                """
+            else:
+                ticker_html = f"{nome_ticker.upper()}"
+
+            
+
             st.markdown(f"""
                     <div style="font-size: 22px; font-weight: bold; margin-bottom: 2px;">
-                        <a href="{st.session_state['website']}" target="_blank" style="text-decoration: none; color: inherit;">
-                            {nome_ticker.upper()}
-                        </a>
+                        {ticker_html}
+                       
                     </div>
                     <div style="font-size: 12px;"><b>{st.session_state['nationality_exchange']['nation']} - {st.session_state['nationality_exchange']['exchange']}</b></div>
                     <div style="font-size: 13px; font-weight: normal; color: #444;">
