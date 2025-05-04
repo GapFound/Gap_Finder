@@ -1278,7 +1278,7 @@ with col2:
 
                                     link = b['Link']
                                     if not link.startswith('http'):
-                                        link = 'https://'+ b['Link']
+                                        link = "https://gapfinder.streamlit.app"+ b['Link']
                                     
                                     st.markdown(f"""
                                                 <div style="text-align:left; font-size: 13px;">
