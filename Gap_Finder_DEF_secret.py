@@ -1275,11 +1275,15 @@ with col2:
                                     #             </div>
                                             
                                     #             """, unsafe_allow_html=True)
+
+                                    link = b['Link']
+                                    if not link.startwith('http'):
+                                        link = 'https://'+ b['Link']
                                     
                                     st.markdown(f"""
                                                 <div style="text-align:left; font-size: 13px;">
                                                     <strong style="color: red;">{data_da_stampa}</strong>&nbsp;
-                                                    <a href="{b['Link']}" style="text-decoration: none; color: inherit;">
+                                                    <a href="{link}" style="text-decoration: none; color: inherit;">
                                                         {b['Title']}
                                                     </a>
                                                 </div>
