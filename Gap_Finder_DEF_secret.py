@@ -1277,7 +1277,7 @@ with col2:
                                     #             """, unsafe_allow_html=True)
 
                                     link = b['Link']
-                                    if not link.startwith('http'):
+                                    if not link.startswith('http'):
                                         link = 'https://'+ b['Link']
                                     
                                     st.markdown(f"""
