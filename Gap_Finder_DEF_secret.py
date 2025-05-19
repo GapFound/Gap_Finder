@@ -232,7 +232,8 @@ def stock_split(nome_ticker,cache_file,FMP_api_key):
 # CARICO I DATI FONDAMENTALI DA FINVIZ e YFINANCE
 
 def fondamentali_func(nome_ticker):
-    
+
+    fond_df = nationality = exchange = sector = industry = website = None
     
     market_cap = 'M.Cap'
     outstanding = 'Outstand.'
@@ -304,6 +305,8 @@ def fondamentali_func(nome_ticker):
         
    
     # fondamentali da finviz
+
+    finvitz_data = None
     
     tentativi = 1
     while tentativi < 5:
