@@ -247,7 +247,7 @@ def fondamentali_func(nome_ticker):
     # fondamentali da yahoo finance
     
     try:
-        ticker = uf.Ticker(nome_ticker.upper())
+        ticker = yf.Ticker(nome_ticker.upper())
         fond = ticker.info
 
         def prendi_trasforma_valore(voce):
