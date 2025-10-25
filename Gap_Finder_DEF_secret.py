@@ -33,6 +33,8 @@ import pickle
 
 import os
 
+from urllib.parse import urlparse, urljoin
+
 #from st_aggrid import AgGrid
 
 
@@ -1416,7 +1418,7 @@ with col2:
            col2_4,col2_5,col2_6 = st.columns([0.20,0.83,0.14])
           
            with col2_5: 
-                   
+
                    st.write("");st.write("");st.write("");st.write("");st.write("");#st.write("")
                    st.markdown(f"""
                                    <div style="text-align:center; font-size: 14px;">
@@ -1456,6 +1458,17 @@ with col2:
                                   # Mostra l'output con la data formattata
                                    
                                 with col2_5: 
+
+                                    def to_abs(url, base="https://finviz.com/"):
+                                            u = str(url).strip()
+                                            if not u: return u
+                                            pu = urlparse(u)
+                                            if pu.scheme: return u              # già http/https
+                                            if u.startswith("//"): return "https:" + u
+                                            if u.startswith("/"):  return urljoin(base, u)
+                                            return urljoin(base, "/" + u)       # es. "news/123..." -> https://finviz.com/news/123...
+
+                                
                                     # st.markdown(f"""
                                     #             <div style="text-align:left; font-size: 13px;">
                                     #             <strong style="color: red;">{data_da_stampa}</strong>&nbsp;
@@ -1466,16 +1479,29 @@ with col2:
                                             
                                     #             """, unsafe_allow_html=True)
                                     
+                                    #st.markdown(f"""
+                                    #            <div style="text-align:left; font-size: 13px;">
+                                    #                <strong style="color: red;">{data_da_stampa}</strong>&nbsp;
+                                    #                <a href="{b['Link']}" style="text-decoration: none; color: inherit;">
+                                    #                    {b['Title']}
+                                    #                </a>
+                                    #            </div>
+                                    #        """, unsafe_allow_html=True)
+
+                                            
+
+                                    link  = to_abs(b['Link'], base="https://finviz.com/")
+                                    title = str(b['Title']).strip()
                                     st.markdown(f"""
-                                                <div style="text-align:left; font-size: 13px;">
-                                                    <strong style="color: red;">{data_da_stampa}</strong>&nbsp;
-                                                    <a href="{b['Link']}" style="text-decoration: none; color: inherit;">
-                                                        {b['Title']}
-                                                    </a>
-                                                </div>
-                                            """, unsafe_allow_html=True)
-                                            
-                                            
+                                        <div style="text-align:left; font-size: 13px;">
+                                            <strong style="color: red;">{data_da_stampa}</strong>&nbsp;
+                                            <a href="{link}" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit;">
+                                                {title}
+                                            </a>
+                                        </div>
+                                        """,
+                                        unsafe_allow_html=True)
+                                           
                                             
                                             
                                                 
