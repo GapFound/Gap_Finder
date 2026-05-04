@@ -425,6 +425,9 @@ def fondamentali_func(nome_ticker):
         ticker = yf.Ticker(nome_ticker.upper())
         fond = ticker.info
 
+        nationality_exchange = {'nation': fond.get('country','-'),
+                                'exchange':fond.get('fullExchangeName',fond.get('exchange','-'))}   
+
         def prendi_trasforma_valore(voce):
             try:
                 if fond[voce]>=10**9:
@@ -475,6 +478,9 @@ def fondamentali_func(nome_ticker):
                         insider_own:' - ',
                         inst_own:' - ',
                         short_float:' - ' }
+
+        nationality_exchange = {'nation':" - ",'exchange':" - "}
+        
     #print(fondamentali_yf)        
      
         
@@ -509,8 +515,8 @@ def fondamentali_func(nome_ticker):
                     return risposta   
                 
                         
-                nationality_exchange = {'nation':prendi_voce("Country"),
-                                        'exchange':prendi_voce("Exchange")}            
+                #nationality_exchange = {'nation':prendi_voce("Country"),
+                #                        'exchange':prendi_voce("Exchange")}            
                     
                 sector_industry = {'sector':prendi_voce("Sector"),
                                 'industry':prendi_voce("Industry")}
@@ -548,7 +554,7 @@ def fondamentali_func(nome_ticker):
                         short_float:' - ' }
         
         
-        nationality_exchange = {'nation':" - ",'exchange':" - "}
+        #nationality_exchange = {'nation':" - ",'exchange':" - "}
         sector_industry = {'sector':' - ','industry':' - '}
         news = 'problemi nel caricamento delle news da Finviz'
         #return fondamentali 
