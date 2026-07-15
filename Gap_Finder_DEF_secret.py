@@ -8,7 +8,11 @@ Created on Thu Dec  5 11:34:33 2024
 
 import numpy as np
 import pandas as pd
+
 import requests
+session = requests.Session()
+session.headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
+
 #import matplotlib.pyplot as plt
 #import matplotlib.dates as mdates
 from datetime import datetime,timedelta,date
@@ -633,7 +637,7 @@ def yfinance_func(nome_ticker):
     try:
     
         # CARICO DA YFINANCE I DATI STORICI DI PREZZO
-        ticker = yf.Ticker(nome_ticker.upper())   
+        ticker = yf.Ticker(nome_ticker.upper(), session=session)   
         dati_storici = ticker.history(period="max")  # dati periodo massimo disponibile   
         #dati_storici.index = dati_storici.index.tz_localize(None)
         
