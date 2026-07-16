@@ -3,6 +3,6 @@ pandas==1.5.3
 plotly==5.9.0
 IPython==8.15.0
 yfinance==0.2.54
-git+https://github.com/lit26/finvizfinance.git
+finvizfinance @ git+https://github.com/lit26/finvizfinance.git
 streamlit==1.40.2
 requests
