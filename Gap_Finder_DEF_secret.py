@@ -377,7 +377,7 @@ def fondamentali_func(nome_ticker):
     
     # 1. Recupero dati fondamentali da Yahoo Finance
     try:
-        ticker = yf.Ticker(nome_ticker.upper(), session=session)
+        ticker = yf.Ticker(nome_ticker.upper())
         fond = ticker.info
 
         def prendi_trasforma_valore(voce):
