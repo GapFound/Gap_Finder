@@ -415,24 +415,24 @@ def fondamentali_func(nome_ticker):
         website = ""
         fondamentali_yf = {market_cap: ' - ', outstanding: ' - ', shares_float: ' - ', insider_own: ' - ', inst_own: ' - ', short_float: ' - ' }
      
-        # ST.HTML BLINDATO: Spaziature ottimizzate (nazione vicina al ticker e gap prima delle info)
-                st.html(f"""
-                    <div style="font-size: 22px; font-weight: bold; margin-bottom: 0px; line-height: 1.1;">
-                        {ticker_html}
-                    </div>
-                    <div style="font-size: 13.5px; font-weight: bold; color: #d00; margin-bottom: 8px;">
-                        {st.session_state.get('nationality_exchange', {}).get('nation_full', ' - ')}
-                    </div>
-                    <div style="font-size: 12px; margin-bottom: 5px;">
-                        <b>{st.session_state.get('nationality_exchange', {}).get('nation', ' - ')} - {st.session_state.get('nationality_exchange', {}).get('exchange', ' - ')}</b>
-                    </div>
-                    <div style="font-size: 13px; font-weight: normal; color: #444;">
-                        {st.session_state.get('sector_industry', {}).get('sector', ' - ')}
-                    </div>
-                    <div style="font-size: 13px; font-weight: normal; color: #444;">
-                        {st.session_state.get('sector_industry', {}).get('industry', ' - ')}
-                    </div>
-                """)
+# ST.HTML BLINDATO: Spaziature ottimizzate (nazione vicina al ticker e gap prima delle info)
+        st.html(f"""
+            <div style="font-size: 22px; font-weight: bold; margin-bottom: 0px; line-height: 1.1;">
+                {ticker_html}
+            </div>
+            <div style="font-size: 13.5px; font-weight: bold; color: #d00; margin-bottom: 8px;">
+                {st.session_state.get('nationality_exchange', {}).get('nation_full', ' - ')}
+            </div>
+            <div style="font-size: 12px; margin-bottom: 5px;">
+                <b>{st.session_state.get('nationality_exchange', {}).get('nation', ' - ')} - {st.session_state.get('nationality_exchange', {}).get('exchange', ' - ')}</b>
+            </div>
+            <div style="font-size: 13px; font-weight: normal; color: #444;">
+                {st.session_state.get('sector_industry', {}).get('sector', ' - ')}
+            </div>
+            <div style="font-size: 13px; font-weight: normal; color: #444;">
+                {st.session_state.get('sector_industry', {}).get('industry', ' - ')}
+            </div>
+        """)
         
     # Eliminiamo completamente Finviz per non avere crash o latenza. Lasciamo la colonna Fz vuota con trattini per mantenere intatta la tabella
     fondamentali_fz = {
