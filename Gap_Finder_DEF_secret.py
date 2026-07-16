@@ -415,15 +415,26 @@ def fondamentali_func(nome_ticker):
         website = ""
         fondamentali_yf = {market_cap: ' - ', outstanding: ' - ', shares_float: ' - ', insider_own: ' - ', inst_own: ' - ', short_float: ' - ' }
      
-    # Carichiamo direttamente il profilo (Settore, Exchange, Website) gestito dalla Cache in datagathering_func
+    # Carichiamo direttamente il profilo (Settore, Exchange, Website, Nazione) gestito dalla Cache in datagathering_func
     cached_profile = st.session_state.get('cached_profile', None)
     if cached_profile:
         nationality_exchange = cached_profile['nationality_exchange']
+        
+        # SUPER FALLBACK: Se nation_full è assente o è un trattino, lo ricalcoliamo all'istante dalla sigla 'nation'
+        if 'nation_full' not in nationality_exchange or nationality_exchange.get('nation_full') in [' - ', '---', '-', '']:
+            raw_locale = nationality_exchange.get('nation', 'US').upper()
+            country_map_short = {
+                "US": "United States", "CN": "China", "KY": "Cayman Islands", 
+                "GB": "United Kingdom", "CA": "Canada", "IL": "Israel", 
+                "SG": "Singapore", "HK": "Hong Kong", "AU": "Australia"
+            }
+            nationality_exchange['nation_full'] = country_map_short.get(raw_locale, raw_locale)
+            
         sector_industry = cached_profile['sector_industry']
         if not website:
             website = cached_profile['website']
     else:
-        nationality_exchange = {'nation': " - ", 'exchange': " - "}
+        nationality_exchange = {'nation': " - ", 'nation_full': " - ", 'exchange': " - "}
         sector_industry = {'sector': ' - ', 'industry': ' - '}
         
     # Eliminiamo completamente Finviz per non avere crash o latenza. Lasciamo la colonna Fz vuota con trattini per mantenere intatta la tabella
