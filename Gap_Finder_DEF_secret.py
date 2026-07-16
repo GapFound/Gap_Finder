@@ -946,12 +946,15 @@ with col1:
             else:
                 ticker_html = f"{nome_ticker.upper()}"
 
-            # ST.HTML CARICA DIRETTAMENTE EXCHANGE, SETTORE E INDUSTRIA DA MASSIVE/POLYGON SENZA RIPETIZIONI
+            # ST.HTML CARICA DIRETTAMENTE COUNTRY, EXCHANGE, SETTORE E INDUSTRIA DA MASSIVE/POLYGON
             st.html(f"""
                 <div style="font-size: 22px; font-weight: bold; margin-bottom: 2px;">
                     {ticker_html}
                 </div>
-                <div style="font-size: 12px;"><b>{st.session_state['nationality_exchange']['nation']} - {st.session_state['nationality_exchange']['exchange']}</b></div>
+                <div style="font-size: 13.5px; font-weight: bold; color: #d00; margin-bottom: 1px;">
+                    {st.session_state['nationality_exchange']['nation_full']}
+                </div>
+                <div style="font-size: 12px; margin-bottom: 5px;"><b>{st.session_state['nationality_exchange']['nation']} - {st.session_state['nationality_exchange']['exchange']}</b></div>
                 <div style="font-size: 13px; font-weight: normal; color: #444;">
                     {st.session_state['sector_industry']['sector']}
                 </div>
