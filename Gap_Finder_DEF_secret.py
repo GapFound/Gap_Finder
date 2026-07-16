@@ -947,21 +947,25 @@ with col1:
                 ticker_html = f"{nome_ticker.upper()}"
 
             # ST.HTML CARICA DIRETTAMENTE COUNTRY, EXCHANGE, SETTORE E INDUSTRIA DA MASSIVE/POLYGON
+            # ST.HTML BLINDATO: Utilizza .get() per prevenire al 100% qualsiasi KeyError da cache
             st.html(f"""
                 <div style="font-size: 22px; font-weight: bold; margin-bottom: 2px;">
                     {ticker_html}
                 </div>
                 <div style="font-size: 13.5px; font-weight: bold; color: #d00; margin-bottom: 1px;">
-                    {st.session_state['nationality_exchange']['nation_full']}
+                    {st.session_state.get('nationality_exchange', {}).get('nation_full', ' - ')}
                 </div>
-                <div style="font-size: 12px; margin-bottom: 5px;"><b>{st.session_state['nationality_exchange']['nation']} - {st.session_state['nationality_exchange']['exchange']}</b></div>
-                <div style="font-size: 13px; font-weight: normal; color: #444;">
-                    {st.session_state['sector_industry']['sector']}
+                <div style="font-size: 12px; margin-bottom: 5px;">
+                    <b>{st.session_state.get('nationality_exchange', {}).get('nation', ' - ')} - {st.session_state.get('nationality_exchange', {}).get('exchange', ' - ')}</b>
                 </div>
                 <div style="font-size: 13px; font-weight: normal; color: #444;">
-                    {st.session_state['sector_industry']['industry']}
+                    {st.session_state.get('sector_industry', {}).get('sector', ' - ')}
+                </div>
+                <div style="font-size: 13px; font-weight: normal; color: #444;">
+                    {st.session_state.get('sector_industry', {}).get('industry', ' - ')}
                 </div>
             """)
+            
 
             st.table(st.session_state['fondamentali'])
             print(st.session_state['fondamentali'])
