@@ -415,27 +415,24 @@ def fondamentali_func(nome_ticker):
         website = ""
         fondamentali_yf = {market_cap: ' - ', outstanding: ' - ', shares_float: ' - ', insider_own: ' - ', inst_own: ' - ', short_float: ' - ' }
      
-    # Carichiamo direttamente il profilo (Settore, Exchange, Website, Nazione) gestito dalla Cache in datagathering_func
-    cached_profile = st.session_state.get('cached_profile', None)
-    if cached_profile:
-        nationality_exchange = cached_profile['nationality_exchange']
-        
-        # SUPER FALLBACK: Se nation_full è assente o è un trattino, lo ricalcoliamo all'istante dalla sigla 'nation'
-        if 'nation_full' not in nationality_exchange or nationality_exchange.get('nation_full') in [' - ', '---', '-', '']:
-            raw_locale = nationality_exchange.get('nation', 'US').upper()
-            country_map_short = {
-                "US": "United States", "CN": "China", "KY": "Cayman Islands", 
-                "GB": "United Kingdom", "CA": "Canada", "IL": "Israel", 
-                "SG": "Singapore", "HK": "Hong Kong", "AU": "Australia"
-            }
-            nationality_exchange['nation_full'] = country_map_short.get(raw_locale, raw_locale)
-            
-        sector_industry = cached_profile['sector_industry']
-        if not website:
-            website = cached_profile['website']
-    else:
-        nationality_exchange = {'nation': " - ", 'nation_full': " - ", 'exchange': " - "}
-        sector_industry = {'sector': ' - ', 'industry': ' - '}
+    # ST.HTML BLINDATO: Spaziature ottimizzate (nazione vicina al ticker e gap prima delle info)
+            st.html(f"""
+                <div style="font-size: 22px; font-weight: bold; margin-bottom: 0px; line-height: 1.1;">
+                    {ticker_html}
+                </div>
+                <div style="font-size: 13.5px; font-weight: bold; color: #d00; margin-bottom: 8px;">
+                    {st.session_state.get('nationality_exchange', {}).get('nation_full', ' - ')}
+                </div>
+                <div style="font-size: 12px; margin-bottom: 5px;">
+                    <b>{st.session_state.get('nationality_exchange', {}).get('nation', ' - ')} - {st.session_state.get('nationality_exchange', {}).get('exchange', ' - ')}</b>
+                </div>
+                <div style="font-size: 13px; font-weight: normal; color: #444;">
+                    {st.session_state.get('sector_industry', {}).get('sector', ' - ')}
+                </div>
+                <div style="font-size: 13px; font-weight: normal; color: #444;">
+                    {st.session_state.get('sector_industry', {}).get('industry', ' - ')}
+                </div>
+            """)
         
     # Eliminiamo completamente Finviz per non avere crash o latenza. Lasciamo la colonna Fz vuota con trattini per mantenere intatta la tabella
     fondamentali_fz = {
