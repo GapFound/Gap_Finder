@@ -1047,7 +1047,7 @@ with col2:
                     </div>
                 """)
                
-           col2_4, col2_5, col2_6 = st.columns([0.20, 0.83, 0.14])
+           col2_4, col2_5, col2_6 = st.columns([0.10, 0.80, 0.10])
           
            with col2_5: 
                    st.write(""); st.write(""); st.write(""); st.write(""); st.write("")
