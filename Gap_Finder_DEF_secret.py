@@ -367,6 +367,8 @@ def stock_split(nome_ticker, cache_file, FMP_api_key):
 
 # CARICO I DATI FONDAMENTALI DA YFINANCE (ED ESCLUDO FINVIZ)
 
+# CARICO I DATI FONDAMENTALI DA YFINANCE (ED ESCLUDO FINVIZ)
+
 def fondamentali_func(nome_ticker):
     fond_df = nationality = exchange = sector = industry = website = None
     
@@ -421,11 +423,22 @@ def fondamentali_func(nome_ticker):
     cached_profile = st.session_state.get('cached_profile', None)
     if cached_profile:
         nationality_exchange = cached_profile['nationality_exchange']
+        
+        # AGGIUNTA GESTIONE DEL PAESE IN CHIARO (Traduce la sigla per visualizzarla in rosso)
+        if 'nation_full' not in nationality_exchange or nationality_exchange.get('nation_full') in [' - ', '---', '-', '']:
+            raw_locale = nationality_exchange.get('nation', 'US').upper()
+            country_map_short = {
+                "US": "United States", "CN": "China", "KY": "Cayman Islands", 
+                "GB": "United Kingdom", "CA": "Canada", "IL": "Israel", 
+                "SG": "Singapore", "HK": "Hong Kong", "AU": "Australia"
+            }
+            nationality_exchange['nation_full'] = country_map_short.get(raw_locale, raw_locale)
+            
         sector_industry = cached_profile['sector_industry']
         if not website:
             website = cached_profile['website']
     else:
-        nationality_exchange = {'nation': " - ", 'exchange': " - "}
+        nationality_exchange = {'nation': " - ", 'nation_full': " - ", 'exchange': " - "}
         sector_industry = {'sector': ' - ', 'industry': ' - '}
         
     # Eliminiamo completamente Finviz per non avere crash o latenza. Lasciamo la colonna Fz vuota con trattini per mantenere intatta la tabella
@@ -444,7 +457,6 @@ def fondamentali_func(nome_ticker):
     fond_df = fond_fz_df.merge(fond_yf_df, on='a').set_index('a')
     fond_df.index.name = None
     return fond_df, nationality_exchange, sector_industry, website
-
 #%%
 
 # CARICO LE NEWS DA FINVIZ
