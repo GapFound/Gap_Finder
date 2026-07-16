@@ -37,7 +37,7 @@ session.headers.update({
 # FUNZIONE HELPER PER SCARICARE IL PROFILO AZIENDALE DA MASSIVE/POLYGON CON MAPPATURA MACRO-SETTORI E PAESI ISO
 def fetch_polygon_profile(nome_ticker):
     default_profile = {
-        'nationality_exchange': {'nation': " - ", 'nation_full': " - ", 'exchange': " - "},
+        'nationality_exchange': {'nation': " - ", 'exchange': " - "},
         'sector_industry': {'sector': ' - ', 'industry': ' - '},
         'website': ''
     }
@@ -423,7 +423,7 @@ def stock_split(nome_ticker, cache_file, FMP_api_key):
 
 #%%
 
-# CARICO I DATI FONDAMENTALI DA YFINANCE (ED ESCLUDO FINVIZ DALLA LIBRERIA PYPI BUGGATA)
+# CARICO I DATI FONDAMENTALI DA YFINANCE (ED ESCLUDO FINVIZ)
 
 def fondamentali_func(nome_ticker):
     fond_df = nationality = exchange = sector = industry = website = None
@@ -477,30 +477,42 @@ def fondamentali_func(nome_ticker):
      
     # Carichiamo direttamente il profilo (Settore, Exchange, Website, Nazione) gestito dalla Cache in datagathering_func
     cached_profile = st.session_state.get('cached_profile', None)
-    if cached_profile:
-        nationality_exchange = cached_profile['nationality_exchange']
-        
-        # SUPER FALLBACK: Se nation_full è assente o è un trattino vuoto, lo ricalcoliamo all'istante dalla sigla 'nation'
-        if 'nation_full' not in nationality_exchange or nationality_exchange.get('nation_full') in [' - ', '---', '-', '']:
-            raw_locale = nationality_exchange.get('nation', 'US').upper()
-            country_map_short = {
-                "US": "United States", "CN": "China", "KY": "Cayman Islands", 
-                "GB": "United Kingdom", "CA": "Canada", "IL": "Israel", 
-                "SG": "Singapore", "HK": "Hong Kong", "AU": "Australia"
-            }
-            nationality_exchange['nation_full'] = country_map_short.get(raw_locale, raw_locale)
+    
+    # Inizializzazione sicura dei valori di default
+    nationality_exchange = {'nation': " - ", 'nation_full': " - ", 'exchange': " - "}
+    sector_industry = {'sector': ' - ', 'industry': ' - '}
+    
+    # Se il profilo in cache è un dizionario valido, lo processiamo in sicurezza per evitare KeyError/TypeError da cache corrotte
+    if isinstance(cached_profile, dict):
+        raw_nat_exc = cached_profile.get('nationality_exchange')
+        if isinstance(raw_nat_exc, dict):
+            nationality_exchange = raw_nat_exc
             
-        sector_industry = cached_profile['sector_industry']
+            # SUPER FALLBACK: Se nation_full è assente o è un trattino vuoto, lo ricalcoliamo all'istante dalla sigla 'nation'
+            if 'nation_full' not in nationality_exchange or nationality_exchange.get('nation_full') in [' - ', '---', '-', '', None]:
+                raw_locale = nationality_exchange.get('nation', 'US')
+                if not isinstance(raw_locale, str):
+                    raw_locale = 'US'
+                raw_locale = raw_locale.upper()
+                
+                country_map_short = {
+                    "US": "United States", "CN": "China", "KY": "Cayman Islands", 
+                    "GB": "United Kingdom", "CA": "Canada", "IL": "Israel", 
+                    "SG": "Singapore", "HK": "Hong Kong", "AU": "Australia"
+                }
+                nationality_exchange['nation_full'] = country_map_short.get(raw_locale, raw_locale)
+                
+        raw_sec_ind = cached_profile.get('sector_industry')
+        if isinstance(raw_sec_ind, dict):
+            sector_industry = raw_sec_ind
+            
         if not website:
-            website = cached_profile['website']
-    else:
-        nationality_exchange = {'nation': " - ", 'nation_full': " - ", 'exchange': " - "}
-        sector_industry = {'sector': ' - ', 'industry': ' - '}
+            website = cached_profile.get('website', '')
         
-    # 3. Fondamentali da Finviz (riattivato usando la libreria patchata caricata da GitHub)
+    # 3. Fondamentali da Finviz (riattivato usando la libreria standard che viene catturata in try/except)
     fondamentali_fz = {
         market_cap: ' - ', outstanding: ' - ', shares_float: ' - ',
-        insider_own: ' - ', inst_own: ' - ', short_float: ' - '
+        insider_own: ' - ', inst_own: ' - ', short_float: ' - ' 
     }
     try:
         stock = finvizfinance(nome_ticker)
@@ -642,13 +654,13 @@ def datagathering_func(nome_ticker):
                     '4. close': 'Close',
                     '5. volume': 'Volume'}, inplace=True)
                 
-                # SPOSTATA LA CONVERSIONE NUMERICA DENTRO LA PROTEZIONE DI SICUREZZA PER EVITARE KEYERROR
+                # SPOSTATA DEFINITIVAMENTE LA CONVERSIONE NUMERICA DENTRO LA PROTEZIONE DI SICUREZZA PER PREVENIRE IL KEYERROR
                 cols = ['Open', 'High', 'Low', 'Close', 'Volume']
                 dati_storici[cols] = dati_storici[cols].apply(pd.to_numeric, errors='coerce')
+                dati_storici.sort_index(ascending=True, inplace=True) 
                 
             print('prima delle trasformazioni')
             print(dati_storici[:5].to_string() if not dati_storici.empty else "Dati vuoti")
-            dati_storici.sort_index(ascending=True, inplace=True) 
             
         if not dati_storici.empty:    
              dati_storici.index = pd.to_datetime(dati_storici.index).normalize()
