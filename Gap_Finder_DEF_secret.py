@@ -1031,10 +1031,10 @@ with col2:
                green_pct = (green_count / total_gaps) * 100
                
                st.html(f"""
-                   <div style="text-align: center; font-size: 15px; font-weight: bold; margin-top: 10px; margin-bottom: 2px;">
+                   <div style="text-align: center; font-size: 15px; font-weight: normal; margin-top: 10px; margin-bottom: 2px;">
                        {red_count} vs {green_count}
                    </div>
-                   <div style="text-align: center; font-size: 13.5px; margin-top: 0px; margin-bottom: 5px; font-weight: bold;">
+                   <div style="text-align: center; font-size: 13.5px; margin-top: 0px; margin-bottom: 5px; font-weight: normal;">
                        🟥 RED: {red_pct:.2f}% &nbsp;|&nbsp; GREEN: {green_pct:.2f}% 🟩
                    </div>
                """)
