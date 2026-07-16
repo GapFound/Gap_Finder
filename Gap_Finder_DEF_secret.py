@@ -25,6 +25,7 @@ import streamlit.components.v1 as components
 import pickle
 import os
 import sys
+import textwrap
 
 # INIZIALIZZAZIONE DELLA SESSIONE GLOBALE PER EVITARE I BLOCCHI DI YAHOO FINANCE
 session = requests.Session()
@@ -501,7 +502,7 @@ def fondamentali_func(nome_ticker):
                     "SG": "Singapore", "HK": "Hong Kong", "AU": "Australia"
                 }
                 nationality_exchange['nation_full'] = country_map_short.get(raw_locale, raw_locale)
-                
+            
         raw_sec_ind = cached_profile.get('sector_industry')
         if isinstance(raw_sec_ind, dict):
             sector_industry = raw_sec_ind
@@ -1043,8 +1044,8 @@ with col1:
             else:
                 ticker_html = f"{nome_ticker.upper()}"
 
-            # ST.HTML CARICA DIRETTAMENTE EXCHANGE, SETTORE E INDUSTRIA DA MASSIVE/POLYGON SENZA RIPETIZIONI (CON PAESE IN ROSSO)
-            st.html(f"""
+            # ST.MARKDOWN BLINDATO: Spaziature ottimizzate con nazione in rosso ed allineamento nativo nel DOM (sblocca apertura in nuova scheda)
+            st.markdown(textwrap.dedent(f"""
                 <div style="font-size: 22px; font-weight: bold; margin-bottom: 0px; line-height: 1.1;">
                     {ticker_html}
                 </div>
@@ -1060,7 +1061,7 @@ with col1:
                 <div style="font-size: 13px; font-weight: normal; color: #444;">
                     {st.session_state.get('sector_industry', {}).get('industry', ' - ')}
                 </div>
-            """)
+            """), unsafe_allow_html=True)
 
             st.table(st.session_state['fondamentali'])
             print(st.session_state['fondamentali'])
@@ -1182,26 +1183,26 @@ with col2:
                                if not link.startswith('http'):
                                     link = "https://finviz.com/" + b['Link']
                                         
-                               # USATO ST.HTML CHE RISOLVE ALL'ORIGINE I BOX GRIGI
+                               # USATO ST.MARKDOWN BLINDATO PER RISOLVERE ALL'ORIGINE I CONFLITTI DI APERTURA IN NUOVA SCHEDA
                                news_html += f"""
                                     <div style="text-align:left; font-size: 13px; margin-bottom: 6px; line-height: 1.3;">
                                         <strong style="color: red;">{data_da_stampa}</strong>&nbsp;
-                                        <a href="{link}" style="text-decoration: none; color: inherit;">
+                                        <a href="{link}" style="text-decoration: none; color: inherit;" target="_blank">
                                             {b['Title']}
                                         </a>
                                     </div>
                                """
                            
-                           # STAMPATO UNICAMENTE UNA VOLTA FUORI DAL LOOP
-                           st.html(news_html)
+                           # STAMPATO UNICAMENTE UNA VOLTA FUORI DAL LOOP ATTRAVERSO ST.MARKDOWN PROTETTO
+                           st.markdown(textwrap.dedent(news_html), unsafe_allow_html=True)
 
                    if isinstance(st.session_state['news'], str):
-                           # USATO ST.HTML
-                           st.html(f"""
+                           # USATO ST.MARKDOWN PROTETTO
+                           st.markdown(textwrap.dedent(f"""
                                <div style="text-align:center; font-size: 14px;">
                                    {st.session_state['news']}
                                </div>
-                           """)
+                           """), unsafe_allow_html=True)
  
            if not v_gaps.empty:
                 with col3:
