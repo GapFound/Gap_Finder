@@ -34,10 +34,10 @@ session.headers.update({
 
 #%%
 
-# FUNZIONE HELPER PER SCARICARE IL PROFILO AZIENDALE DA MASSIVE/POLYGON CON MAPPATURA MACRO-SETTORI SEC
+# FUNZIONE HELPER PER SCARICARE IL PROFILO AZIENDALE DA MASSIVE/POLYGON CON MAPPATURA MACRO-SETTORI E PAESI ISO
 def fetch_polygon_profile(nome_ticker):
     default_profile = {
-        'nationality_exchange': {'nation': " - ", 'exchange': " - "},
+        'nationality_exchange': {'nation': " - ", 'nation_full': " - ", 'exchange': " - "},
         'sector_industry': {'sector': ' - ', 'industry': ' - '},
         'website': ''
     }
@@ -99,9 +99,71 @@ def fetch_polygon_profile(nome_ticker):
             if sector == " - ":
                 sector = sic_desc
                 
+            raw_locale = results.get('locale', 'US').upper()
+            
+            # DIZIONARIO OMNICOMPRENSIVO STANDARD ISO 3166-1 alpha-2
+            country_map = {
+                "AD": "Andorra", "AE": "United Arab Emirates", "AF": "Afghanistan", "AG": "Antigua and Barbuda",
+                "AI": "Anguilla", "AL": "Albania", "AM": "Armenia", "AO": "Angola", "AQ": "Antarctica",
+                "AR": "Argentina", "AS": "American Samoa", "AT": "Austria", "AU": "Australia", "AW": "Aruba",
+                "AX": "Åland Islands", "AZ": "Azerbaijan", "BA": "Bosnia and Herzegovina", "BB": "Barbados",
+                "BD": "Bangladesh", "BE": "Belgium", "BF": "Burkina Faso", "BG": "Bulgaria", "BH": "Bahrain",
+                "BI": "Burundi", "BJ": "Benin", "BL": "Saint Barthélemy", "BM": "Bermuda", "BN": "Brunei",
+                "BO": "Bolivia", "BQ": "Bonaire, Sint Eustatius and Saba", "BR": "Brazil", "BS": "Bahamas",
+                "BT": "Bhutan", "BV": "Bouvet Island", "BW": "Botswana", "BY": "Belarus", "BZ": "Belize",
+                "CA": "Canada", "CC": "Cocos (Keeling) Islands", "CD": "Congo (DRC)", "CF": "Central African Republic",
+                "CG": "Congo (Republic)", "CH": "Switzerland", "CI": "Côte d'Ivoire", "CK": "Cook Islands",
+                "CL": "Chile", "CM": "Cameroon", "CN": "China", "CO": "Colombia", "CR": "Costa Rica",
+                "CU": "Cuba", "CV": "Cabo Verde", "CW": "Curaçao", "CX": "Christmas Island", "CY": "Cyprus",
+                "CZ": "Czechia", "DE": "Germany", "DJ": "Djibouti", "DK": "Denmark", "DM": "Dominica",
+                "DO": "Dominican Republic", "DZ": "Algeria", "EC": "Ecuador", "EE": "Estonia", "EG": "Egypt",
+                "EH": "Western Sahara", "ER": "Eritrea", "ES": "Spain", "ET": "Ethiopia", "FI": "Finland",
+                "FJ": "Fiji", "FK": "Falkland Islands", "FM": "Micronesia", "FO": "Faroe Islands", "FR": "France",
+                "GA": "Gabon", "GB": "United Kingdom", "GD": "Grenada", "GE": "Georgia", "GF": "French Guiana",
+                "GG": "Guernsey", "GH": "Ghana", "GI": "Gibraltar", "GL": "Greenland", "GM": "Gambia",
+                "GN": "Guinea", "GP": "Guadeloupe", "GQ": "Equatorial Guinea", "GR": "Greece",
+                "GS": "South Georgia & South Sandwich Islands", "GT": "Guatemala", "GU": "Guam", "GW": "Guinea-Bissau",
+                "GY": "Government of Guyana", "HK": "Hong Kong", "HM": "Heard Island and McDonald Islands", "HN": "Honduras",
+                "HR": "Croatia", "HT": "Haiti", "HU": "Hungary", "ID": "Indonesia", "IE": "Ireland",
+                "IL": "Israel", "IM": "Isle of Man", "IN": "India", "IO": "British Indian Ocean Territory",
+                "IQ": "Iraq", "IR": "Iran", "IS": "Iceland", "IT": "Italy", "JE": "Jersey", "JM": "Jamaica",
+                "JO": "Jordan", "JP": "Japan", "KE": "Kenya", "KG": "Kyrgyzstan", "KH": "Cambodia",
+                "KI": "Kiribati", "KM": "Comoros", "KN": "Saint Kitts and Nevis", "KP": "North Korea",
+                "KR": "South Korea", "KW": "Kuwait", "KY": "Cayman Islands", "KZ": "Kazakhstan",
+                "LA": "Laos", "LB": "Lebanon", "LC": "Saint Lucia", "LI": "Liechtenstein", "LK": "Sri Lanka",
+                "LR": "Liberia", "LS": "Lesotho", "LT": "Lithuania", "LU": "Luxembourg", "LV": "Latvia",
+                "LY": "Libya", "MA": "Morocco", "MC": "Monaco", "MD": "Moldova", "ME": "Montenegro",
+                "MF": "Saint Martin", "MG": "Madagascar", "MH": "Marshall Islands", "MK": "North Macedonia",
+                "ML": "Mali", "MM": "Myanmar", "MN": "Mongolia", "MO": "Macao", "MP": "Northern Mariana Islands",
+                "MQ": "Martinique", "MR": "Mauritania", "MS": "Montserrat", "MT": "Malta", "MU": "Mauritius",
+                "MV": "Maldives", "MW": "Malawi", "MX": "Mexico", "MY": "Malaysia", "MZ": "Mozambique",
+                "NA": "Namibia", "NC": "New Caledonia", "NE": "Niger", "NF": "Norfolk Island", "NG": "Nigeria",
+                "NI": "Nicaragua", "NL": "Netherlands", "NO": "Norway", "NP": "Nepal", "NR": "Nauru",
+                "NU": "Niue", "NZ": "New Zealand", "OM": "Oman", "PA": "Panama", "PE": "Peru", "PF": "French Polynesia",
+                "PG": "Papua New Guinea", "PH": "Philippines", "PK": "Pakistan", "PL": "Poland",
+                "PM": "Saint Pierre and Miquelon", "PN": "Pitcairn Islands", "PR": "Puerto Rico", "PS": "Palestine",
+                "PT": "Portugal", "PW": "Palau", "PY": "Paraguay", "QA": "Qatar", "RE": "Réunion", "RO": "Romania",
+                "RS": "Serbia", "RU": "Russia", "RW": "Rwanda", "SA": "Saudi Arabia", "SB": "Solomon Islands",
+                "SC": "Seychelles", "SD": "Sudan", "SE": "Sweden", "SG": "Singapore", "SH": "Saint Helena",
+                "SI": "Slovenia", "SJ": "Svalbard and Jan Mayen", "SK": "Slovakia", "SL": "Sierra Leone",
+                "SM": "San Marino", "SN": "Senegal", "SO": "Somalia", "SR": "Suriname", "SS": "South Sudan",
+                "ST": "São Tomé and Príncipe", "SV": "El Salvador", "SX": "Sint Maarten", "SY": "Syria",
+                "SZ": "Eswatini", "TC": "Turks and Caicos Islands", "TD": "Chad", "TF": "French Southern Territories",
+                "TG": "Togo", "TH": "Thailand", "TJ": "Tajikistan", "TK": "Tokelau", "TL": "Timor-Leste",
+                "TM": "Turkmenistan", "TN": "Tunisia", "TO": "Tonga", "TR": "Turkey", "TT": "Trinidad and Tobago",
+                "TV": "Tuvalu", "TW": "Taiwan", "TZ": "Tanzania", "UA": "Ukraine", "UG": "Uganda",
+                "UM": "U.S. Outlying Islands", "US": "United States", "UY": "Uruguay", "UZ": "Uzbekistan",
+                "VA": "Vatican City", "VC": "Saint Vincent and the Grenadines", "VE": "Venezuela",
+                "VG": "British Virgin Islands", "VI": "U.S. Virgin Islands", "VN": "Vietnam", "VU": "Vanuatu",
+                "WF": "Wallis and Futuna", "WS": "Samoa", "YE": "Yemen", "YT": "Mayotte", "ZA": "South Africa",
+                "ZM": "Zambia", "ZW": "Zimbabwe"
+            }
+            nation_full = country_map.get(raw_locale, raw_locale)
+            
             return {
                 'nationality_exchange': {
-                    'nation': results.get('locale', 'US').upper(),
+                    'nation': raw_locale,
+                    'nation_full': nation_full,
                     'exchange': exchange_cleaned
                 },
                 'sector_industry': {
@@ -413,26 +475,62 @@ def fondamentali_func(nome_ticker):
         website = ""
         fondamentali_yf = {market_cap: ' - ', outstanding: ' - ', shares_float: ' - ', insider_own: ' - ', inst_own: ' - ', short_float: ' - ' }
      
-    # Carichiamo direttamente il profilo (Settore, Exchange, Website) gestito dalla Cache in datagathering_func
+    # Carichiamo direttamente il profilo (Settore, Exchange, Website, Nazione) gestito dalla Cache in datagathering_func
     cached_profile = st.session_state.get('cached_profile', None)
-    if cached_profile:
-        nationality_exchange = cached_profile['nationality_exchange']
-        sector_industry = cached_profile['sector_industry']
+    
+    # Inizializzazione sicura dei valori di default
+    nationality_exchange = {'nation': " - ", 'nation_full': " - ", 'exchange': " - "}
+    sector_industry = {'sector': ' - ', 'industry': ' - '}
+    
+    # Se il profilo in cache è un dizionario valido, lo processiamo in sicurezza per evitare KeyError/TypeError da cache corrotte
+    if isinstance(cached_profile, dict):
+        raw_nat_exc = cached_profile.get('nationality_exchange')
+        if isinstance(raw_nat_exc, dict):
+            nationality_exchange = raw_nat_exc
+            
+            # SUPER FALLBACK: Se nation_full è assente o è un trattino vuoto, lo ricalcoliamo all'istante dalla sigla 'nation'
+            if 'nation_full' not in nationality_exchange or nationality_exchange.get('nation_full') in [' - ', '---', '-', '', None]:
+                raw_locale = nationality_exchange.get('nation', 'US')
+                if not isinstance(raw_locale, str):
+                    raw_locale = 'US'
+                raw_locale = raw_locale.upper()
+                
+                country_map_short = {
+                    "US": "United States", "CN": "China", "KY": "Cayman Islands", 
+                    "GB": "United Kingdom", "CA": "Canada", "IL": "Israel", 
+                    "SG": "Singapore", "HK": "Hong Kong", "AU": "Australia"
+                }
+                nationality_exchange['nation_full'] = country_map_short.get(raw_locale, raw_locale)
+                
+        raw_sec_ind = cached_profile.get('sector_industry')
+        if isinstance(raw_sec_ind, dict):
+            sector_industry = raw_sec_ind
+            
         if not website:
-            website = cached_profile['website']
-    else:
-        nationality_exchange = {'nation': " - ", 'exchange': " - "}
-        sector_industry = {'sector': ' - ', 'industry': ' - '}
+            website = cached_profile.get('website', '')
         
-    # Eliminiamo completamente Finviz per non avere crash o latenza. Lasciamo la colonna Fz vuota con trattini per mantenere intatta la tabella
+    # 3. Fondamentali da Finviz (riattivato usando la libreria standard che viene catturata in try/except)
     fondamentali_fz = {
-        market_cap: ' - ',
-        outstanding: ' - ',   
-        shares_float: ' - ',
-        insider_own: ' - ',
-        inst_own: ' - ',
-        short_float: ' - ' 
+        market_cap: ' - ', outstanding: ' - ', shares_float: ' - ',
+        insider_own: ' - ', inst_own: ' - ', short_float: ' - ' 
     }
+    try:
+        stock = finvizfinance(nome_ticker)
+        finvitz_data = stock.ticker_fundament()
+        
+        def prendi_voce(voce):
+            return finvitz_data.get(voce, ' - ')
+            
+        fondamentali_fz = {
+            market_cap: prendi_voce('Market Cap'),
+            outstanding: prendi_voce('Shs Outstand'),
+            shares_float: prendi_voce('Shs Float'),
+            insider_own: prendi_voce('Insider Own'),
+            inst_own: prendi_voce('Inst Own'),
+            short_float: prendi_voce('Short Float')
+        }
+    except Exception as e:
+        print("Errore caricamento Finviz:", e)
         
     fond_fz_df = pd.DataFrame({'a': fondamentali_fz.keys(), 'Fz': fondamentali_fz.values()})
     fond_yf_df = pd.DataFrame({'a': fondamentali_yf.keys(), 'Yf': fondamentali_yf.values()})
@@ -556,12 +654,13 @@ def datagathering_func(nome_ticker):
                     '4. close': 'Close',
                     '5. volume': 'Volume'}, inplace=True)
                 
+                # SPOSTATA DEFINITIVAMENTE LA CONVERSIONE NUMERICA DENTRO LA PROTEZIONE DI SICUREZZA PER PREVENIRE IL KEYERROR
+                cols = ['Open', 'High', 'Low', 'Close', 'Volume']
+                dati_storici[cols] = dati_storici[cols].apply(pd.to_numeric, errors='coerce')
+                dati_storici.sort_index(ascending=True, inplace=True) 
+                
             print('prima delle trasformazioni')
-            print(dati_storici[:5].to_string())
-            
-            cols = ['Open', 'High', 'Low', 'Close', 'Volume']
-            dati_storici[cols] = dati_storici[cols].apply(pd.to_numeric, errors='coerce')
-            dati_storici.sort_index(ascending=True, inplace=True) 
+            print(dati_storici[:5].to_string() if not dati_storici.empty else "Dati vuoti")
             
         if not dati_storici.empty:    
              dati_storici.index = pd.to_datetime(dati_storici.index).normalize()
@@ -944,17 +1043,22 @@ with col1:
             else:
                 ticker_html = f"{nome_ticker.upper()}"
 
-            # ST.HTML CARICA DIRETTAMENTE EXCHANGE, SETTORE E INDUSTRIA DA MASSIVE/POLYGON SENZA RIPETIZIONI
+            # ST.HTML CARICA DIRETTAMENTE EXCHANGE, SETTORE E INDUSTRIA DA MASSIVE/POLYGON SENZA RIPETIZIONI (CON PAESE IN ROSSO)
             st.html(f"""
-                <div style="font-size: 22px; font-weight: bold; margin-bottom: 2px;">
+                <div style="font-size: 22px; font-weight: bold; margin-bottom: 0px; line-height: 1.1;">
                     {ticker_html}
                 </div>
-                <div style="font-size: 12px;"><b>{st.session_state['nationality_exchange']['nation']} - {st.session_state['nationality_exchange']['exchange']}</b></div>
-                <div style="font-size: 13px; font-weight: normal; color: #444;">
-                    {st.session_state['sector_industry']['sector']}
+                <div style="font-size: 13.5px; font-weight: bold; color: #d00; margin-bottom: 8px;">
+                    {st.session_state.get('nationality_exchange', {}).get('nation_full', ' - ')}
+                </div>
+                <div style="font-size: 12px; margin-bottom: 5px;">
+                    <b>{st.session_state.get('nationality_exchange', {}).get('nation', ' - ')} - {st.session_state.get('nationality_exchange', {}).get('exchange', ' - ')}</b>
                 </div>
                 <div style="font-size: 13px; font-weight: normal; color: #444;">
-                    {st.session_state['sector_industry']['industry']}
+                    {st.session_state.get('sector_industry', {}).get('sector', ' - ')}
+                </div>
+                <div style="font-size: 13px; font-weight: normal; color: #444;">
+                    {st.session_state.get('sector_industry', {}).get('industry', ' - ')}
                 </div>
             """)
 
@@ -1020,7 +1124,7 @@ with col2:
                # INTEGRATA LA FUNZIONE RENDER_TABLE_WITH_SLIDER CON SCROLLER ORIZZONTALE SULLE TABELLE
                render_table_with_slider(v_gaps, key="gaps")
                
-               # CALCOLO E VISUALIZZAZIONE DELLE STATISTICHE DI CHIUSURA RED/GREEN DEI GAPPER FILTRATI
+               # CALCOLO E VISUALIZZAZIONE DELLE STATISTICHE DI CHIUSURA RED/GREEN DEI GAPPER FILTRATI (CON CONTEGGIO MINIMALISTA IN REGULAR)
                total_gaps = len(v_gaps)
                red_count = len(v_gaps[v_gaps['Chiusura'] == 'RED'])
                green_count = len(v_gaps[v_gaps['Chiusura'] == 'GREEN'])
@@ -1029,7 +1133,10 @@ with col2:
                green_pct = (green_count / total_gaps) * 100
                
                st.html(f"""
-                   <div style="text-align: center; font-size: 13.5px; margin-top: 10px; margin-bottom: 5px; font-weight: bold;">
+                   <div style="text-align: center; font-size: 15px; font-weight: normal; margin-top: 10px; margin-bottom: 2px;">
+                       {red_count} vs {green_count}
+                   </div>
+                   <div style="text-align: center; font-size: 13.5px; margin-top: 0px; margin-bottom: 5px; font-weight: bold;">
                        🟥 RED: {red_pct:.2f}% &nbsp;|&nbsp; GREEN: {green_pct:.2f}% 🟩
                    </div>
                """)
@@ -1041,11 +1148,11 @@ with col2:
                     </div>
                 """)
                
-           col2_4, col2_5, col2_6 = st.columns([0.20, 0.83, 0.14])
+           # SOTTO-COLONNE SIMMETRICHE PER CENTRARE PERFETTAMENTE IL BLOCCO DELLE NEWS SOTTO LE STATISTICHE
+           col2_4, col2_5, col2_6 = st.columns([0.10, 0.80, 0.10])
           
            with col2_5: 
                    st.write(""); st.write(""); st.write(""); st.write(""); st.write("")
-                   # ABBIAMO AGGIORNATO CON ST.HTML
                    st.html(f"""
                        <div style="text-align:center; font-size: 14px;">
                            <b>news:</b> <br/> <br/>
