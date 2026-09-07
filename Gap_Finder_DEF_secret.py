@@ -6,7 +6,7 @@ Created on Thu Dec  5 11:34:33 2024
 
 @author: ninni
 """
-
+  
 import numpy as np
 import pandas as pd
 import requests
