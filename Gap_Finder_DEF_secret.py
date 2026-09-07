@@ -1411,7 +1411,7 @@ def visual_gap(nome_ticker, n_gap, dati_storici_ADJ):
 #  INTERFACCIA UTENTE
 
 st.set_page_config(
-    page_title="GAPs Finder NEW",
+    page_title="GAPs Finder",
     page_icon="📈",
     layout="wide",  
 ) 
@@ -1503,7 +1503,7 @@ with col1:
         """, unsafe_allow_html=True)
 
     with st.form(key=f'GAPs_Finder'):
-            nome_ticker = st.text_input('**GAPsFinder v 1.06mx**', placeholder='Enter the Ticker').strip()
+            nome_ticker = st.text_input('**GAPsFinder v 1.06mx_PIPPO**', placeholder='Enter the Ticker').strip()
             bottone_ricerca = st.form_submit_button('ricerca GAPs')
          
     stampa_col1 = st.empty()  
