@@ -1720,14 +1720,23 @@ with col2:
                                  gap_A, gap_B, volume*1_000_000, prezzo_A, prezzo_B)
                                  
 
-           # AVVISO COMPATTO DI FALLBACK ALPHAVANTAGE
+           # AVVISO COMPATTO DI FALLBACK ALPHAVANTAGE (SUBITO SOPRA LA TABELLA)
            if st.session_state.get('provider') == 'alphavantage':
                 st.markdown(
-                    "<div style='text-align: center; font-size: 12px; color: #d00; margin-top: 28px; margin-bottom: 8px; font-weight: 600; font-family: system-ui,-apple-system;'>"
+                    "<div style='text-align: center; font-size: 11.5px; color: #d00; margin-top: 4px; margin-bottom: 12px; font-weight: 700; font-family: system-ui,-apple-system;'>"
                     "⚠️ Dati storici YFinance non disponibili: analisi limitata agli ultimi 5 mesi (AlphaVantage)"
                     "</div>",
                     unsafe_allow_html=True
-                )
+                ) 
+           
+           # AVVISO COMPATTO DI FALLBACK ALPHAVANTAGE
+           #if st.session_state.get('provider') == 'alphavantage':
+           #     st.markdown(
+           #         "<div style='text-align: center; font-size: 12px; color: #d00; margin-top: 28px; margin-bottom: 8px; font-weight: 600; font-family: system-ui,-apple-system;'>"
+           #         "⚠️ Dati storici YFinance non disponibili: analisi limitata agli ultimi 5 mesi (AlphaVantage)"
+           #         "</div>",
+           #         unsafe_allow_html=True
+           #     )
                       
            
            st.write(""); st.write("")
