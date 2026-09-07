@@ -1167,7 +1167,7 @@ def datagathering_func(nome_ticker):
             ALPHA_api_key = st.secrets["ALPHA_api_key"]
             symbol = nome_ticker.upper()
             function = 'TIME_SERIES_DAILY'
-            outputsize = 'full'
+            outputsize = 'compact'
       
             url = f'https://www.alphavantage.co/query?function={function}&symbol={symbol}&outputsize={outputsize}&apikey={ALPHA_api_key}'
             response = requests.get(url)
