@@ -1507,7 +1507,7 @@ with col1:
         """, unsafe_allow_html=True)
 
     with st.form(key=f'GAPs_Finder'):
-            nome_ticker = st.text_input('**GAPsFinder  v 1.07_YF_AV**', placeholder='Enter the Ticker').strip()
+            nome_ticker = st.text_input('**GAPsFinder   1.07_YF_AV**', placeholder='Enter the Ticker').strip()
             bottone_ricerca = st.form_submit_button('ricerca GAPs')
          
     stampa_col1 = st.empty()  
