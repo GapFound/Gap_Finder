@@ -1411,7 +1411,7 @@ def visual_gap(nome_ticker, n_gap, dati_storici_ADJ):
 #  INTERFACCIA UTENTE
 
 st.set_page_config(
-    page_title="GAPs Finder",
+    page_title="GAPs Finder NEW",
     page_icon="📈",
     layout="wide",  
 ) 
