@@ -1172,7 +1172,7 @@ def datagathering_func(nome_ticker):
             url = f'https://www.alphavantage.co/query?function={function}&symbol={symbol}&outputsize={outputsize}&apikey={ALPHA_api_key}'
             response = requests.get(url)
             data = response.json()
-            st.write("DEBUG AV:", data)
+            #st.write("DEBUG AV:", data)
       
             if 'Time Series (Daily)' in data:
                 time_series = data['Time Series (Daily)']
