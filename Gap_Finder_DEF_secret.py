@@ -1627,6 +1627,8 @@ with col1:
                 st.session_state['news'] = news
                 st.session_state['dati_split'] = dati_split
                 st.session_state['dati_storici_ADJ'] = dati_storici_ADJ
+                st.session_state['provider'] = provider
+                
         else:
             st.warning('Enter the Ticker')
             
@@ -1719,7 +1721,7 @@ with col2:
                                  
 
            # AVVISO COMPATTO DI FALLBACK ALPHAVANTAGE
-           if st.session_state.get('provider') == 'alphavantage' or provider == 'alphavantage':
+           if st.session_state.get('provider') == 'alphavantage':
                 st.markdown(
                     "<div style='text-align: center; font-size: 12px; color: #f57f17; margin-top: -10px; margin-bottom: 12px; font-weight: 500; font-family: system-ui,-apple-system;'>"
                     "⚠️ Dati storici YFinance non disponibili: analisi limitata agli ultimi 5 mesi (AlphaVantage)"
