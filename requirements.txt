@@ -6,3 +6,4 @@ yfinance==0.2.51
 finvizfinance 
 streamlit==1.40.2
 requests
+curl-cffi
