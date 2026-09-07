@@ -439,7 +439,7 @@ def fondamentali_func(nome_ticker):
     
     try:
         # Passata la sessione per evitare blocchi IP
-        ticker = yf.Ticker(nome_ticker.upper())
+        ticker = yf.Ticker(nome_ticker.upper(),session=session)
         fond = ticker.info
 
         def prendi_trasforma_valore(voce):
@@ -616,7 +616,7 @@ def datagathering_func(nome_ticker):
              splits_df=pd.DataFrame()
                 
         try:
-            ticker = yf.Ticker(nome_ticker.upper())   
+            ticker = yf.Ticker(nome_ticker.upper(),session=session)   
             dati_storici = ticker.history(period="max")
             
             if not dati_storici.empty:
