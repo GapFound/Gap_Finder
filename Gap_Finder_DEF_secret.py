@@ -1723,7 +1723,7 @@ with col2:
            # AVVISO COMPATTO DI FALLBACK ALPHAVANTAGE
            if st.session_state.get('provider') == 'alphavantage':
                 st.markdown(
-                    "<div style='text-align: center; font-size: 12px; color: #d00; margin-top: 38px; margin-bottom: 8px; font-weight: 600; font-family: system-ui,-apple-system;'>"
+                    "<div style='text-align: center; font-size: 12px; color: #d00; margin-top: 28px; margin-bottom: 8px; font-weight: 600; font-family: system-ui,-apple-system;'>"
                     "⚠️ Dati storici YFinance non disponibili: analisi limitata agli ultimi 5 mesi (AlphaVantage)"
                     "</div>",
                     unsafe_allow_html=True
