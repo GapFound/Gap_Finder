@@ -1627,7 +1627,7 @@ with col1:
                 st.session_state['news'] = news
                 st.session_state['dati_split'] = dati_split
                 st.session_state['dati_storici_ADJ'] = dati_storici_ADJ
-                st.session_state['provider'] = provider
+                st.session_state['provider'] = 'alphavantage' #provider
                 
         else:
             st.warning('Enter the Ticker')
