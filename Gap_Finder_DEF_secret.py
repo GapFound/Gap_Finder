@@ -1715,7 +1715,18 @@ with col2:
                prezzo_A, prezzo_B = st.slider('**prezzo minimo $**', 0, 200, step=1, key='slider_price')
                
            v_gaps = ricerca_gaps(nome_ticker, st.session_state['dati_storici'], \
-                                 gap_A, gap_B, volume*1_000_000, prezzo_A, prezzo_B) 
+                                 gap_A, gap_B, volume*1_000_000, prezzo_A, prezzo_B)
+                                 
+
+           # AVVISO COMPATTO DI FALLBACK ALPHAVANTAGE
+           if st.session_state.get('provider') == 'alphavantage' or provider == 'alphavantage':
+                st.markdown(
+                    "<div style='text-align: center; font-size: 12px; color: #f57f17; margin-top: -10px; margin-bottom: 12px; font-weight: 500; font-family: system-ui,-apple-system;'>"
+                    "⚠️ Dati storici YFinance non disponibili: analisi limitata agli ultimi 5 mesi (AlphaVantage)"
+                    "</div>",
+                    unsafe_allow_html=True
+                )
+                      
            
            st.write(""); st.write("")
            
